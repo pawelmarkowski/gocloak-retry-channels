@@ -93,18 +93,18 @@ func renewTokenWithRetry(t *TokenJWT, timer *time.Timer, onRequest bool) error {
 		}
 	}
 	t.mu.Lock()
-	err := retry.Do(func() error { return t.refresh() })
+	err := retry.Do(t.refresh)
 	if err != nil {
 		fmt.Println("Cannot renew the token", err)
 		fmt.Println("Trying to create new token")
-		err := retry.Do(func() error { return t.login() })
+		err := retry.Do(t.login)
 		if err != nil {
 			fmt.Println("Token renewal impossible")
 			return err
 		}
 	}
 	t.lastRenewReqest = time.Now()
-	if onRequest == true {
+	if onRequest {
 		timer.Stop()
 	}
 	*timer = *time.NewTimer(t.getRenewTime())
