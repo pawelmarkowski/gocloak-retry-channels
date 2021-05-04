@@ -107,7 +107,6 @@ func renewTokenWithRetry(t *TokenJWT, timer *time.Timer, onRequest bool) error {
 	if onRequest == true {
 		timer.Stop()
 	}
-	t.token.ExpiresIn = 5
 	*timer = *time.NewTimer(t.getRenewTime())
 	// uncloak here due to https://github.com/golang/go/issues/40722
 	t.mu.Unlock()
