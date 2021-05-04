@@ -19,7 +19,7 @@ func (c Consumer) callbackFunc(event int) {
 }
 
 // workerFunc starts a single worker function that will range on the jobsChan until that channel closes.
-func (c Consumer) workerFunc(wg *sync.WaitGroup, index int, renewChanel chan int) {
+func (c Consumer) workerFunc(wg *sync.WaitGroup, index int, renewChannel chan int) {
 	defer wg.Done()
 
 	fmt.Printf("Worker %d starting\n", index)
@@ -28,7 +28,7 @@ func (c Consumer) workerFunc(wg *sync.WaitGroup, index int, renewChanel chan int
 		fmt.Printf("Worker %d started job %d\n", index, eventIndex)
 		fmt.Println("Worker ", index, "sends renew token request")
 		time.Sleep(5 * time.Second)
-		renewChanel <- 1
+		renewChannel <- 1
 		fmt.Printf("Worker %d finished processing job %d\n", index, eventIndex)
 	}
 	fmt.Printf("Worker %d interrupted\n", index)
