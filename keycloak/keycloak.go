@@ -86,7 +86,7 @@ func (t *TokenJWT) RenewToken() {
 
 func renewTokenWithRetry(t *TokenJWT, timer *time.Timer, onRequest bool) error {
 	if onRequest == true {
-		nextRenew := 10*time.Second - time.Now().Sub(t.lastRenewReqest)
+		nextRenew := 30*time.Second - time.Now().Sub(t.lastRenewReqest)
 		if nextRenew > 0 {
 			fmt.Printf("Renew token on demand skipped (next ondemand renew in %d)\n", nextRenew)
 			return nil
