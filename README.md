@@ -19,6 +19,32 @@ go run main.go consumer.go producer.go
 go build -o .app
 ```
 
+# Keycloak module
+
+```mermaid
+classDiagram
+
+TokenJWT "1" *-- "0..1" JWT: Contains
+
+class TokenJWT{
+    <<struct>>
+    -*JWT token
+    +chan[int] RenewRequest
+    -timeTime lastRenewRequest
+    -gocloakGoCloak client
+    -contextContext ctx
+    -syncMutex mu
+
+    +New() (*TokenJWT, error)
+    -login() error
+    -refresh() error
+    +GetToken() *JWT
+    -getRenewTime() timeDuration
+    +RenewToken()
+    -renewTokenWithRetry() error
+}
+```
+
 ## Bibliography
 
 Helpful websites used during the work on this project
