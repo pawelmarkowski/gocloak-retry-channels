@@ -28,7 +28,6 @@ TokenJWT "1" *-- "0..1" JWT: Contains
 
 class TokenJWT{
     <<struct>>
-    -*JWT token
     +chan[int] RenewRequest
     -timeTime lastRenewRequest
     -gocloakGoCloak client
