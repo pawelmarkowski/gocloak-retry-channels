@@ -44,7 +44,7 @@ class TokenJWT{
 }
 ```
 
-## Data completness validator
+## Data completeness validator
 
 Conception
 
@@ -67,7 +67,7 @@ class InputFactory{
     
 }
 
-class DataCompletnessValidator{
+class DataCompletenessValidator{
     
 }
 
@@ -83,11 +83,11 @@ class PsqlStore{
 class FileStore{
     <<interface>>
 }
-DataCompletnessValidator ..> InputFactory
+DataCompletenessValidator ..> InputFactory
 InputFactory ..> OdataInput
 InputFactory ..> CSVInput
 InputFactory ..> PsqlInput
-DataCompletnessValidator ..> OutputFactory
+DataCompletenessValidator ..> OutputFactory
 OutputFactory ..> PsqlStore
 OutputFactory ..> FileStore
 ```
