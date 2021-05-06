@@ -19,7 +19,7 @@ go run main.go consumer.go producer.go
 go build -o .app
 ```
 
-# Keycloak module
+## Keycloak module
 
 ```mermaid
 classDiagram
@@ -43,6 +43,71 @@ class TokenJWT{
     -renewTokenWithRetry() error
 }
 ```
+
+## Data completness validator
+
+Conception
+
+```mermaid
+classDiagram
+
+class OdataInput{
+    <<interface>>
+}
+
+class CSVInput{
+    <<interface>>
+}
+
+class PsqlInput{
+    <<interface>>
+}
+
+class InputFactory{
+    
+}
+
+class DataCompletnessValidator{
+    
+}
+
+
+class OutputFactory {
+    
+}
+
+class PsqlStore{
+    <<interface>>
+}
+
+class FileStore{
+    <<interface>>
+}
+DataCompletnessValidator ..> InputFactory
+InputFactory ..> OdataInput
+InputFactory ..> CSVInput
+InputFactory ..> PsqlInput
+DataCompletnessValidator ..> OutputFactory
+OutputFactory ..> PsqlStore
+OutputFactory ..> FileStore
+```
+
+### Output
+
+Continuous monitoring
+```mermaid
+graph TD
+    A[Start] --> B{"if object <IDENTIFIER> is assigned to sourceA?"};
+    B -- Yes --> C[Done];
+    B -- No ----> D{if source == A};
+    D -- Yes --> E[Assign sourceA to <IDENTIFIER>];
+    E --> F[Mark <IDENTIFIER> as assigned];
+    F --> C;
+    D -- No --> G[Assign sourceB to <IDENTIFIER>];
+    G --> C;
+```
+Simple solution
+* set(SourceA) - set(SourceA)
 
 ## Bibliography
 
