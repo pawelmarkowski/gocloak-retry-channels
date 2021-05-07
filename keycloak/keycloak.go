@@ -18,14 +18,23 @@ type TokenJWT struct {
 	client          gocloak.GoCloak
 	ctx             context.Context
 	mu              sync.Mutex
+	client_id       string
+	realm           string
+	username        string
+	password        string
 }
 
-func New() (*TokenJWT, error) {
+func New(ctx context.Context, auth_url string, client_id string, realm string, username string, password string) (*TokenJWT, error) {
 	token := &TokenJWT{
 		RenewRequest:    make(chan int),
-		client:          gocloak.NewClient(os.Getenv("AUTH_URL")),
-		ctx:             context.Background(),
-		lastRenewReqest: time.Now()}
+		client:          gocloak.NewClient(auth_url),
+		ctx:             ctx,
+		lastRenewReqest: time.Now(),
+		client_id:       client_id,
+		realm:           realm,
+		username:        username,
+		password:        password,
+	}
 	err := token.login()
 	return token, err
 }
@@ -33,11 +42,11 @@ func New() (*TokenJWT, error) {
 func (t *TokenJWT) login() error {
 	token, err := t.client.Login(
 		t.ctx,
-		os.Getenv("CLIENT_ID"),
+		t.client_id,
 		"",
-		os.Getenv("REALM"),
-		os.Getenv("USERNAME"),
-		os.Getenv("PASSWORD"))
+		t.realm,
+		t.username,
+		t.password)
 	if err != nil {
 		return err
 	}
@@ -70,16 +79,22 @@ func (t TokenJWT) getRenewTime() time.Duration {
 	return time.Duration(float64(t.token.ExpiresIn)*0.95) * time.Second
 }
 
-func (t *TokenJWT) RenewToken() {
+func (t *TokenJWT) RenewToken(wg *sync.WaitGroup) {
 	fmt.Println(t.token)
 	timer := time.NewTimer(t.getRenewTime())
 	defer timer.Stop()
+	defer wg.Done()
 	for {
 		select {
 		case <-t.RenewRequest:
 			renewTokenWithRetry(t, timer, true)
 		case <-timer.C:
 			renewTokenWithRetry(t, timer, false)
+		case <-t.ctx.Done():
+			fmt.Println("RenewToken received cancellation signal, closing RenewRequest!")
+			close(t.RenewRequest)
+			fmt.Println("RenewToken closed RenewRequest")
+			return
 		}
 	}
 }
