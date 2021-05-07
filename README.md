@@ -33,16 +33,57 @@ class TokenJWT{
     -gocloakGoCloak client
     -contextContext ctx
     -syncMutex mu
+    -client_id string
+    -realm string
+    -username string
+    -password string
 
-    +New() (*TokenJWT, error)
+    +New(ctx context.Context, auth_url string, client_id string, realm string, username string, password string) (*TokenJWT, error)
     -login() error
     -refresh() error
     +GetToken() *JWT
     -getRenewTime() timeDuration
-    +RenewToken()
+    +RenewToken(wg *sync.WaitGroup)
     -renewTokenWithRetry() error
 }
 ```
+
+example usage
+```go
+func main() {
+	// Set up cancellation context and waitgroup
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+
+	token, err := keycloak.New(
+		ctx,
+		os.Getenv("AUTH_URL"),
+		os.Getenv("CLIENT_ID"),
+		os.Getenv("REALM"),
+		os.Getenv("USERNAME"),
+		os.Getenv("PASSWORD"))
+	if err != nil {
+		panic(err)
+	}
+	// // Start keycloak token control and Add [workerPoolSize] to WaitGroup
+	wg.Add(1)
+	go token.RenewToken(wg)
+
+    // Handle sigterm and await termChan signal
+	termChan := make(chan os.Signal)
+	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
+
+	<-termChan // Blocks here until interrupted
+
+	// Handle shutdown
+	fmt.Println("*********************************\nShutdown signal received\n*********************************")
+	cancelFunc() // Signal cancellation to context.Context
+	wg.Wait()    // Block here until are workers are done
+
+	fmt.Println("All workers done, shutting down!")
+}
+```
+
 
 ## Data completeness validator
 
@@ -52,19 +93,20 @@ Conception
 classDiagram
 
 class OdataInput{
-    <<interface>>
+    Load()
 }
 
 class CSVInput{
-    <<interface>>
+    Load()
 }
 
 class PsqlInput{
-    <<interface>>
+    Load()
 }
 
-class InputFactory{
-    
+class LoadInputData{
+    <<interface>>
+    Load()
 }
 
 class DataCompletenessValidator{
@@ -83,10 +125,10 @@ class PsqlStore{
 class FileStore{
     <<interface>>
 }
-DataCompletenessValidator ..> InputFactory
-InputFactory ..> OdataInput
-InputFactory ..> CSVInput
-InputFactory ..> PsqlInput
+DataCompletenessValidator ..> LoadInputData
+LoadInputData ..> OdataInput
+LoadInputData ..> CSVInput
+LoadInputData ..> PsqlInput
 DataCompletenessValidator ..> OutputFactory
 OutputFactory ..> PsqlStore
 OutputFactory ..> FileStore
