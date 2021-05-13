@@ -67,7 +67,8 @@ func (r *Retry) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 			return
 		}
 		log.Println("Retrying http request... Attempt:", i+1)
-		time.Sleep(time.Duration(4+rand.Intn(5)) * time.Second)
+		// max 120 min 30
+		time.Sleep(time.Duration(rand.Intn(120-30)+30) * time.Second)
 	}
 	return
 }
@@ -95,7 +96,7 @@ func (o *odata) loadData(ctx context.Context, ch chan string, wg *sync.WaitGroup
 				retryCounter += 1
 				fmt.Println("Request error", err, "(retry #", retryCounter, ")")
 				if retryCounter < 3 {
-					time.Sleep(time.Duration(4+rand.Intn(5)) * time.Second)
+					time.Sleep(time.Duration(rand.Intn(120-30)+30) * time.Second)
 					continue
 				} else {
 					break
@@ -108,7 +109,7 @@ func (o *odata) loadData(ctx context.Context, ch chan string, wg *sync.WaitGroup
 				retryCounter += 1
 				fmt.Println("Parsing resp error", err, "(retry #", retryCounter, ")")
 				if retryCounter < 3 {
-					time.Sleep(time.Duration(4+rand.Intn(5)) * time.Second)
+					time.Sleep(time.Duration(rand.Intn(120-30)+30) * time.Second)
 					continue
 				} else {
 					break
