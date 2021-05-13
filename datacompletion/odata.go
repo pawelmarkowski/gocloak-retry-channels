@@ -66,14 +66,14 @@ func (r *Retry) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 		if resp != nil && err == nil {
 			return
 		}
-		log.Println("Retrying http request... Attempt:", i+1)
+		log.Println(err, "retrying http request... Attempt:", i+1)
 		// max 120 min 30
 		time.Sleep(time.Duration(rand.Intn(120-30)+30) * time.Second)
 	}
 	return
 }
 
-var client = &http.Client{Timeout: 60 * time.Second, Transport: &Retry{
+var client = &http.Client{Timeout: 90 * time.Second, Transport: &Retry{
 	nums:      5,
 	transport: http.DefaultTransport,
 }}
